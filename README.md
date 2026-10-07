@@ -18,7 +18,33 @@ DoneZone brings boards, flexible lists, and task cards together in one focused w
 - Email sign-in, a no-account demo, and light/dark themes.
 - Responsive layouts with locally hosted Plus Jakarta Sans.
 
-## How it is built
+## Architecture
+
+```mermaid
+flowchart TD
+    UI["Task board interface<br/>React + TanStack Start on Lovable"]
+    Controller["Browser workspace logic<br/>Boards, lists, tasks and labels"]
+    Auth["Supabase Auth<br/>Email magic-link sign-in"]
+    Data["Supabase Postgres<br/>User data protected by row-level security"]
+    Backup["Board snapshots and restore<br/>Schedule checks while the board is open"]
+    Demo["No-account demo<br/>Workspace stored in browser memory"]
+
+    UI <--> Controller
+    Controller <-->|Sign-in and session state| Auth
+    Controller <-->|Saved workspaces| Data
+    Controller --> Backup
+    Backup <-->|Snapshots and backup settings| Data
+    Controller <-->|Demo mode| Demo
+
+    classDef frontend fill:#eef2ff,stroke:#6366f1,color:#172033
+    classDef service fill:#f7f8fa,stroke:#94a3b8,color:#172033
+    classDef storage fill:#e7f4ef,stroke:#4a8b74,color:#172033
+    class UI,Controller frontend
+    class Auth,Backup service
+    class Data,Demo storage
+```
+
+Signed-in workspaces use Supabase authentication and access-controlled storage. Demo actions stay in browser memory. Automatic backup checks run while a signed-in board is open and visible; they are not an unattended server job.
 
 The front end is built for Lovable with React and TanStack Start. The implementation is maintained in a separate private GitHub repository. Supabase provides authentication and access-controlled storage.
 
